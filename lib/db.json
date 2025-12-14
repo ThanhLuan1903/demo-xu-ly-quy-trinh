@@ -1,36 +1,72 @@
 {
   "users": [
     {
-      "id": "1",
+      "id": "c3b86042-578d-4bab-94ca-264f059ef7f2",
       "name": "Nguyễn Văn Admin",
       "email": "admin@example.com",
       "password": "admin123",
       "role": "admin",
-      "facility_id": "1",
+      "facility_id": "89b7a0d1-dfd4-4d66-81a4-80dc3212d69d",
       "created_at": "2024-01-01T00:00:00Z"
     },
     {
-      "id": "2",
+      "id": "afc1275c-85ad-4d68-9511-18936185b7de",
       "name": "Trần Thị Reporter",
       "email": "reporter@example.com",
       "password": "reporter123",
       "role": "reporter",
-      "facility_id": "1",
+      "facility_id": "89b7a0d1-dfd4-4d66-81a4-80dc3212d69d",
       "created_at": "2024-01-02T00:00:00Z"
     }
   ],
   "facilities": [
     {
-      "id": "1",
+      "id": "89b7a0d1-dfd4-4d66-81a4-80dc3212d69d",
       "name": "Trụ số chính",
       "location": "Hà Nội",
       "description": "Văn phòng trung tâm"
     },
     {
-      "id": "2",
+      "id": "b16b4512-45a0-43e8-89a9-2c60da56df5b",
       "name": "Nhà máy Bình Dương",
       "location": "Bình Dương",
       "description": "Nhà máy sản xuất"
+    }
+  ],
+  "incidents": [
+    {
+      "id": "539ad650-fa6e-40ff-a657-ffa05524e406",
+      "facility_id": "1",
+      "reporter_id": "2",
+      "title": "Hu dieu hoa tang 3",
+      "description": "ko hoat dong",
+      "proposed_fix": "thay moi",
+      "priority": "critical",
+      "status": "resolved",
+      "assigned_to": "1",
+      "created_at": "2025-12-13T13:37:32.702Z",
+      "updated_at": "2025-12-13T15:10:07.574Z"
+    }
+  ],
+  "incident_attachments": [
+    {
+      "id": "933c7890-ae0e-4e81-bf8f-ffe2a7e59c50",
+      "incident_id": "539ad650-fa6e-40ff-a657-ffa05524e406",
+      "type": "image",
+      "url": "/uploads/incidents/539ad650-fa6e-40ff-a657-ffa05524e406/1765633052703_h_nh-_nh-hoa-sen-_p.jpg",
+      "filename": "hình-ảnh-hoa-sen-đẹp.jpg",
+      "mime": "image/jpeg",
+      "size": 31619,
+      "created_at": "2025-12-13T13:37:32.702Z"
+    }
+  ],
+  "incident_comments": [
+    {
+      "id": "9b8081ac-275e-4979-9187-02ed2e3a76d3",
+      "incident_id": "539ad650-fa6e-40ff-a657-ffa05524e406",
+      "author_id": "1",
+      "message": "hiện tại cần báo cao cho dang uy",
+      "created_at": "2025-12-13T13:59:43.126Z"
     }
   ],
   "procurement_processes": [
@@ -123,77 +159,6 @@
       "file_type": "link",
       "uploaded_by": "admin@example.com",
       "uploaded_at": "2024-01-01T00:00:00Z"
-    }
-  ],
-  "incidents": [
-    {
-      "id": "539ad650-fa6e-40ff-a657-ffa05524e406",
-      "facility_id": "1",
-      "reporter_id": "2",
-      "title": "Hu dieu hoa tang 3",
-      "description": "ko hoat dong",
-      "proposed_fix": "thay moi",
-      "priority": "critical",
-      "status": "resolved",
-      "assigned_to": "1",
-      "created_at": "2025-12-13T13:37:32.702Z",
-      "updated_at": "2025-12-13T15:10:07.574Z"
-    }
-  ],
-  "incident_attachments": [
-    {
-      "id": "933c7890-ae0e-4e81-bf8f-ffe2a7e59c50",
-      "incident_id": "539ad650-fa6e-40ff-a657-ffa05524e406",
-      "type": "image",
-      "url": "/uploads/incidents/539ad650-fa6e-40ff-a657-ffa05524e406/1765633052703_h_nh-_nh-hoa-sen-_p.jpg",
-      "filename": "hình-ảnh-hoa-sen-đẹp.jpg",
-      "mime": "image/jpeg",
-      "size": 31619,
-      "created_at": "2025-12-13T13:37:32.702Z"
-    }
-  ],
-  "incident_comments": [
-    {
-      "id": "9b8081ac-275e-4979-9187-02ed2e3a76d3",
-      "incident_id": "539ad650-fa6e-40ff-a657-ffa05524e406",
-      "author_id": "1",
-      "message": "hiện tại cần báo cao cho dang uy",
-      "created_at": "2025-12-13T13:59:43.126Z"
-    },
-    {
-      "id": "892ed3fa-814e-44e9-9297-4de917c81bc2",
-      "incident_id": "539ad650-fa6e-40ff-a657-ffa05524e406",
-      "author_id": "1",
-      "message": "can cap nhat ngay sau khi",
-      "created_at": "2025-12-13T14:22:19.651Z"
-    },
-    {
-      "id": "5b73bf3b-e79c-4300-8d66-26436d49ecc7",
-      "incident_id": "539ad650-fa6e-40ff-a657-ffa05524e406",
-      "author_id": "1",
-      "message": "cna updare",
-      "created_at": "2025-12-13T14:23:26.364Z"
-    },
-    {
-      "id": "357d0a41-437e-4c8b-bccc-31ae131eb4d8",
-      "incident_id": "539ad650-fa6e-40ff-a657-ffa05524e406",
-      "author_id": "1",
-      "message": "dâdadadadad",
-      "created_at": "2025-12-13T14:37:20.231Z"
-    },
-    {
-      "id": "10920352-4b60-4258-b892-11a30fd8bdff",
-      "incident_id": "539ad650-fa6e-40ff-a657-ffa05524e406",
-      "author_id": "1",
-      "message": "cam ơn ban da phan hoi",
-      "created_at": "2025-12-13T14:57:35.507Z"
-    },
-    {
-      "id": "c7d94f09-c2b2-4b56-b280-36e0e714eb89",
-      "incident_id": "539ad650-fa6e-40ff-a657-ffa05524e406",
-      "author_id": "2",
-      "message": "theo anh cần làm gì",
-      "created_at": "2025-12-13T14:58:04.665Z"
     }
   ]
 }

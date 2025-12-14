@@ -24,9 +24,9 @@ export default function ReporterDashboard() {
     fetchIncidents()
   }, [])
 
-  const fetchIncidents = async () => {
+   const fetchIncidents = async () => {
     try {
-      const response = await fetch("/api/incidents?facility_id=1")
+      const response = await fetch("/api/incidents?facility_id=afc1275c-85ad-4d68-9511-18936185b7de")
       const data = await response.json()
       setIncidents(data)
     } catch (error) {
@@ -34,7 +34,7 @@ export default function ReporterDashboard() {
     } finally {
       setLoading(false)
     }
-  }
+   }
 
   return (
     <ProtectedLayout requiredRole="reporter">
@@ -104,7 +104,7 @@ export default function ReporterDashboard() {
               <div className="text-center py-8">Đang tải...</div>
             ) : (
               <div className="space-y-4">
-                {incidents.slice(0, 3).map((report) => (
+                {(incidents ?? []).slice(0, 3).map((report) => (
                   <Card
                     key={report.id}
                     onClick={() => router.push(`/reporter/reports/${report.id}`)}
@@ -127,9 +127,7 @@ export default function ReporterDashboard() {
                   </Card>
                 ))}
                 {incidents.length === 0 && (
-                  <Card className="p-8 border-0 text-center">
                     <p className="text-slate-500">Bạn chưa có báo cáo nào</p>
-                  </Card>
                 )}
               </div>
             )}

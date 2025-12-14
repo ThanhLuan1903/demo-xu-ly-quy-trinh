@@ -1,40 +1,52 @@
-import { type NextRequest, NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
+import { supabaseAdmin } from "@/lib/supabase"
+
+type DbUser = {
+  id: string
+  name: string
+  email: string
+  password: string
+  role: "admin" | "reporter"
+  facility_id: string | null
+  created_at?: string
+}
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await request.json()
+    const { email, password } = (await request.json()) as { email?: string; password?: string }
 
-    // For demo, using hardcoded credentials
-    const validUsers = [
-      {
-        id: "1",
-        name: "Nguyễn Văn Admin",
-        email: "admin@example.com",
-        password: "admin123",
-        role: "admin",
-        facility_id: "1",
-      },
-      {
-        id: "2",
-        name: "Trần Thị Reporter",
-        email: "reporter@example.com",
-        password: "123",
-        role: "reporter",
-        facility_id: "1",
-      },
-    ]
+    const cleanEmail = String(email || "").trim().toLowerCase()
+    const cleanPassword = String(password || "")
 
-    const user = validUsers.find((u) => u.email === email && u.password === password)
-    
+    if (!cleanEmail || !cleanPassword) {
+      return NextResponse.json({ message: "Missing email or password" }, { status: 400 })
+    }
+
+    const { data: user, error } = await supabaseAdmin
+      .from("users")
+      .select("id,name,email,password,role,facility_id,created_at")
+      .eq("email", cleanEmail)
+      .maybeSingle<DbUser>()
+
+    if (error) {
+      console.error("Supabase login query error:", error)
+      return NextResponse.json({ message: "Internal server error" }, { status: 500 })
+    }
+
     if (!user) {
       return NextResponse.json({ message: "Invalid email or password" }, { status: 401 })
     }
 
-    // Remove password before sending
-    const { password: _, ...userWithoutPassword } = user
+    if (String(user.password) !== cleanPassword) {
+      return NextResponse.json({ message: "Invalid email or password" }, { status: 401 })
+    }
+
+    const { password: _pw, ...userWithoutPassword } = user
 
     return NextResponse.json({ user: userWithoutPassword }, { status: 200 })
-  } catch (error) {
+
+  } catch (e) {
+    console.error("Login error:", e)
     return NextResponse.json({ message: "Internal server error" }, { status: 500 })
   }
 }

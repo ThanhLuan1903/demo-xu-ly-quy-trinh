@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { Sidebar } from "@/components/sidebar"
 
 interface ProtectedLayoutProps {
@@ -11,53 +11,68 @@ interface ProtectedLayoutProps {
 }
 
 type User = {
+  id?: string
   role: "admin" | "reporter"
   name?: string
   email?: string
+  facility_id?: string | null
 }
 
 export function ProtectedLayout({ children, requiredRole }: ProtectedLayoutProps) {
   const router = useRouter()
+  const pathname = usePathname()
+
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // ✅ lift state lên layout để main biết sidebar đang collapsed hay không
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
 
   useEffect(() => {
-    const userCookie = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("user="))
-      ?.split("=")[1]
+    // ✅ chỉ đọc localStorage
+    const raw = localStorage.getItem("user")
 
-    if (!userCookie) {
-      router.push("/login")
+    if (!raw) {
+      setLoading(false)
+      if (pathname !== "/login") router.replace("/login")
       return
     }
 
     try {
-      const userData = JSON.parse(decodeURIComponent(userCookie)) as User
+      const parsed = JSON.parse(raw) as User
 
-      if (requiredRole && userData.role !== requiredRole) {
-        router.push(userData.role === "admin" ? "/admin/dashboard" : "/reporter/dashboard")
+      if (!parsed?.role) {
+        localStorage.removeItem("user")
+        setLoading(false)
+        router.replace("/login")
         return
       }
 
-      setUser(userData)
-    } catch {
-      router.push("/login")
+      // ✅ check role
+      if (requiredRole && parsed.role !== requiredRole) {
+        setUser(parsed)
+        setLoading(false)
+        router.replace(parsed.role === "admin" ? "/admin/dashboard" : "/reporter/dashboard")
+        return
+      }
+
+      setUser(parsed)
+    } catch (e) {
+      console.error("Bad localStorage user:", e)
+      localStorage.removeItem("user")
+      router.replace("/login")
       return
     } finally {
       setLoading(false)
     }
-  }, [router, requiredRole])
+  }, [router, requiredRole, pathname])
 
-  if (loading || !user) {
+  if (loading) {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>
   }
 
-  // ✅ khớp đúng width sidebar trong Sidebar.tsx
-  const sidebarWidth = sidebarCollapsed ? 84 : 288 // px
+  if (!user) return null
+
+  const sidebarWidth = sidebarCollapsed ? 84 : 288
 
   return (
     <div className="min-h-screen bg-white">
@@ -68,11 +83,7 @@ export function ProtectedLayout({ children, requiredRole }: ProtectedLayoutProps
         onCollapsedChange={setSidebarCollapsed}
       />
 
-      {/* ✅ main đổi margin-left theo collapsed */}
-      <main
-        className="transition-[margin] duration-300"
-        style={{ marginLeft: sidebarWidth }}
-      >
+      <main className="transition-[margin] duration-300" style={{ marginLeft: sidebarWidth }}>
         {children}
       </main>
     </div>
