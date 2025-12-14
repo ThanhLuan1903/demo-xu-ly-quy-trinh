@@ -1,0 +1,199 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "name": "Nguyễn Văn Admin",
+      "email": "admin@example.com",
+      "password": "admin123",
+      "role": "admin",
+      "facility_id": "1",
+      "created_at": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "2",
+      "name": "Trần Thị Reporter",
+      "email": "reporter@example.com",
+      "password": "reporter123",
+      "role": "reporter",
+      "facility_id": "1",
+      "created_at": "2024-01-02T00:00:00Z"
+    }
+  ],
+  "facilities": [
+    {
+      "id": "1",
+      "name": "Trụ số chính",
+      "location": "Hà Nội",
+      "description": "Văn phòng trung tâm"
+    },
+    {
+      "id": "2",
+      "name": "Nhà máy Bình Dương",
+      "location": "Bình Dương",
+      "description": "Nhà máy sản xuất"
+    }
+  ],
+  "procurement_processes": [
+    {
+      "id": "1",
+      "title": "Mua trực tiếp",
+      "category": "Procurement",
+      "description": "Quy trình mua sắm trực tiếp từ nhà cung cấp được phê duyệt",
+      "steps": [
+        "Xác định nhu cầu",
+        "Chọn nhà cung cấp",
+        "Tạo đơn mua hàng",
+        "Xác nhận đơn hàng",
+        "Nhận hàng",
+        "Thanh toán"
+      ],
+      "tags": [
+        "direct",
+        "quick"
+      ],
+      "version": "v2.0",
+      "effective_date": "2024-01-01",
+      "created_by": "admin@example.com",
+      "created_at": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "2",
+      "title": "Đấu thầu rộng rãi",
+      "category": "Tender",
+      "description": "Quy trình mua sắm thông qua đấu thầu cạnh tranh",
+      "steps": [
+        "Công bố yêu cầu",
+        "Nhà thầu nộp dự thầu",
+        "Đánh giá dự thầu",
+        "Chọn nhà thầu chiến thắng",
+        "Ký hợp đồng",
+        "Thực hiện hợp đồng"
+      ],
+      "tags": [
+        "tender",
+        "competitive"
+      ],
+      "version": "v1.5",
+      "effective_date": "2024-01-01",
+      "created_by": "admin@example.com",
+      "created_at": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "3",
+      "title": "Thuê thiết bị",
+      "category": "Rental",
+      "description": "Quy trình thuê các thiết bị cần thiết cho hoạt động",
+      "steps": [
+        "Xác định thiết bị cần thuê",
+        "Tìm kiếm nhà cung cấp",
+        "Thương lượng giá",
+        "Ký hợp đồng thuê",
+        "Nhận thiết bị",
+        "Bảo dưỡng định kỳ"
+      ],
+      "tags": [
+        "rental",
+        "equipment"
+      ],
+      "version": "v1.0",
+      "effective_date": "2024-02-01",
+      "created_by": "admin@example.com",
+      "created_at": "2024-02-01T00:00:00Z"
+    }
+  ],
+  "process_forms": [
+    {
+      "id": "1",
+      "process_id": "1",
+      "title": "Biểu mẫu đơn mua hàng",
+      "description": "Mẫu điền thông tin đơn mua hàng",
+      "filename": "1.docx",
+      "external_link": null,
+      "file_type": "pdf",
+      "uploaded_by": "admin@example.com",
+      "uploaded_at": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "2",
+      "process_id": "1",
+      "title": "Hướng dẫn quy trình",
+      "description": "Hướng dẫn chi tiết quy trình mua trực tiếp",
+      "filename": null,
+      "external_link": "https://example.com/guide",
+      "file_type": "link",
+      "uploaded_by": "admin@example.com",
+      "uploaded_at": "2024-01-01T00:00:00Z"
+    }
+  ],
+  "incidents": [
+    {
+      "id": "539ad650-fa6e-40ff-a657-ffa05524e406",
+      "facility_id": "1",
+      "reporter_id": "2",
+      "title": "Hu dieu hoa tang 3",
+      "description": "ko hoat dong",
+      "proposed_fix": "thay moi",
+      "priority": "critical",
+      "status": "resolved",
+      "assigned_to": "1",
+      "created_at": "2025-12-13T13:37:32.702Z",
+      "updated_at": "2025-12-13T15:10:07.574Z"
+    }
+  ],
+  "incident_attachments": [
+    {
+      "id": "933c7890-ae0e-4e81-bf8f-ffe2a7e59c50",
+      "incident_id": "539ad650-fa6e-40ff-a657-ffa05524e406",
+      "type": "image",
+      "url": "/uploads/incidents/539ad650-fa6e-40ff-a657-ffa05524e406/1765633052703_h_nh-_nh-hoa-sen-_p.jpg",
+      "filename": "hình-ảnh-hoa-sen-đẹp.jpg",
+      "mime": "image/jpeg",
+      "size": 31619,
+      "created_at": "2025-12-13T13:37:32.702Z"
+    }
+  ],
+  "incident_comments": [
+    {
+      "id": "9b8081ac-275e-4979-9187-02ed2e3a76d3",
+      "incident_id": "539ad650-fa6e-40ff-a657-ffa05524e406",
+      "author_id": "1",
+      "message": "hiện tại cần báo cao cho dang uy",
+      "created_at": "2025-12-13T13:59:43.126Z"
+    },
+    {
+      "id": "892ed3fa-814e-44e9-9297-4de917c81bc2",
+      "incident_id": "539ad650-fa6e-40ff-a657-ffa05524e406",
+      "author_id": "1",
+      "message": "can cap nhat ngay sau khi",
+      "created_at": "2025-12-13T14:22:19.651Z"
+    },
+    {
+      "id": "5b73bf3b-e79c-4300-8d66-26436d49ecc7",
+      "incident_id": "539ad650-fa6e-40ff-a657-ffa05524e406",
+      "author_id": "1",
+      "message": "cna updare",
+      "created_at": "2025-12-13T14:23:26.364Z"
+    },
+    {
+      "id": "357d0a41-437e-4c8b-bccc-31ae131eb4d8",
+      "incident_id": "539ad650-fa6e-40ff-a657-ffa05524e406",
+      "author_id": "1",
+      "message": "dâdadadadad",
+      "created_at": "2025-12-13T14:37:20.231Z"
+    },
+    {
+      "id": "10920352-4b60-4258-b892-11a30fd8bdff",
+      "incident_id": "539ad650-fa6e-40ff-a657-ffa05524e406",
+      "author_id": "1",
+      "message": "cam ơn ban da phan hoi",
+      "created_at": "2025-12-13T14:57:35.507Z"
+    },
+    {
+      "id": "c7d94f09-c2b2-4b56-b280-36e0e714eb89",
+      "incident_id": "539ad650-fa6e-40ff-a657-ffa05524e406",
+      "author_id": "2",
+      "message": "theo anh cần làm gì",
+      "created_at": "2025-12-13T14:58:04.665Z"
+    }
+  ]
+}
