@@ -62,6 +62,7 @@ interface Incident {
   attachments?: Attachment[];
   comments?: Comment[];
 }
+import { supabaseBrowser } from "@/lib/supabase-browser"
 
 export default function IncidentsPage() {
   const [incidents, setIncidents] = useState<Incident[]>([]);
@@ -210,6 +211,64 @@ export default function IncidentsPage() {
       setBusy(false);
     }
   };
+
+
+
+  useEffect(() => {
+  const incidentId = selectedIncident?.id
+  if (!incidentId) return
+
+  const channel = supabaseBrowser
+    .channel(`comments:${incidentId}`)
+    .on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "incident_comments",
+        filter: `incident_id=eq.${incidentId}`,
+      },
+      async (payload) => {
+        const row = payload.new as any
+
+        // Nếu bạn muốn hiển thị author.name ngay lập tức:
+        // fetch nhẹ user (hoặc cache users list)
+        let author = null
+        try {
+          const { data } = await supabaseBrowser
+            .from("users")
+            .select("id,name,role")
+            .eq("id", row.author_id)
+            .maybeSingle()
+          author = data || null
+        } catch {}
+
+        setSelectedIncident((prev) => {
+          if (!prev) return prev
+          // chống duplicate nếu bạn vừa optimistic update
+          const exists = (prev.comments || []).some((c) => String(c.id) === String(row.id))
+          if (exists) return prev
+          return {
+            ...prev,
+            comments: [
+              ...(prev.comments || []),
+              { ...row, author },
+            ],
+            updated_at: prev.updated_at, // hoặc row.created_at
+          }
+        })
+      }
+    )
+    .subscribe((status) => {
+    console.log("[realtime comments] status =", status, "incidentId =", incidentId)
+  })
+
+  return () => {
+    supabaseBrowser.removeChannel(channel)
+  }
+}, [selectedIncident?.id])
+
+
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -381,7 +440,7 @@ export default function IncidentsPage() {
             open={!!selectedIncident}
             onOpenChange={(open) => !open && closeDetail()}
           >
-            <DialogContent className="max-w-3xl p-0 overflow-hidden">
+            <DialogContent className="max-w-4xl p-0 overflow-hidden">
               {selectedIncident ? (
                 <div className="flex flex-col max-h-[85vh]">
                   {/* Modal header */}
