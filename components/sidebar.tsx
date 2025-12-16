@@ -130,10 +130,7 @@ export function Sidebar({
         {/* Header / Brand + Toggle bên phải */}
         <div className="flex items-center justify-between gap-3 px-4 py-4 border-b border-slate-200">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="h-10 w-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-semibold shadow-sm">
-              AI
-            </div>
-
+           
             {!collapsed && (
               <div className="min-w-0">
                 <h1 className="truncate text-sm font-semibold text-slate-900">
