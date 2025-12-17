@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/dialog";
 import { getStatusLabel } from "@/constant/constant";
 import { supabaseBrowser } from "@/lib/supabase-browser";
+import { LoadingSpinner } from "@/components/loading";
 
 type Attachment = {
   id: string;
@@ -58,6 +59,15 @@ interface Incident {
   comments?: Comment[];
 }
 
+type AdminUser = { id: string; name: string };
+
+type PreviewItem = {
+  id: string;
+  file: File;
+  url: string;
+  kind: "image" | "video" | "file";
+};
+
 export default function ReportsPage() {
   const router = useRouter();
   const [incidents, setIncidents] = useState<Incident[]>([]);
@@ -70,6 +80,74 @@ export default function ReportsPage() {
   const [busy, setBusy] = useState(false);
 
   const commentsEndRef = useRef<HTMLDivElement | null>(null);
+
+  const [createOpen, setCreateOpen] = useState(false);
+  const [admins, setAdmins] = useState<AdminUser[]>([]);
+  const [previews, setPreviews] = useState<PreviewItem[]>([]);
+  const [createLoading, setCreateLoading] = useState(false);
+
+  const [createForm, setCreateForm] = useState({
+    title: "",
+    description: "",
+    proposed_fix: "",
+    priority: "medium" as Incident["priority"],
+    assigned_to: "",
+  });
+
+  const resetCreate = () => {
+    // revoke preview urls
+    setPreviews((prev) => {
+      prev.forEach((p) => URL.revokeObjectURL(p.url));
+      return [];
+    });
+    setCreateForm({
+      title: "",
+      description: "",
+      proposed_fix: "",
+      priority: "medium",
+      assigned_to: admins[0]?.id || "",
+    });
+  };
+
+  const openCreate = () => {
+    setCreateOpen(true);
+  };
+
+  const closeCreate = () => {
+    setCreateOpen(false);
+    // optional: reset form khi đóng
+    // resetCreate()
+  };
+
+  const onPickFiles = (files: FileList | null) => {
+    if (!files) return;
+
+    const list = Array.from(files).map((file) => {
+      const mime = file.type || "";
+      const kind: PreviewItem["kind"] = mime.startsWith("image/")
+        ? "image"
+        : mime.startsWith("video/")
+        ? "video"
+        : "file";
+
+      return {
+        id: crypto.randomUUID(),
+        file,
+        url: URL.createObjectURL(file),
+        kind,
+      };
+    });
+
+    setPreviews((prev) => [...prev, ...list]);
+  };
+
+  const removePreview = (id: string) => {
+    setPreviews((prev) => {
+      const t = prev.find((p) => p.id === id);
+      if (t) URL.revokeObjectURL(t.url);
+      return prev.filter((p) => p.id !== id);
+    });
+  };
 
   const me = useMemo(() => {
     const raw =
@@ -127,6 +205,78 @@ export default function ReportsPage() {
     }
   };
 
+  useEffect(() => {
+    if (!createOpen) return;
+
+    (async () => {
+      try {
+        const res = await fetch("/api/users?role=admin", { cache: "no-store" });
+        const data = await res.json().catch(() => []);
+        if (!res.ok) throw new Error(data?.error || "Failed to fetch admins");
+
+        const list: AdminUser[] = (data || []).map((u: any) => ({
+          id: String(u.id),
+          name: String(u.name || "—"),
+        }));
+        setAdmins(list);
+
+        // auto pick first admin nếu chưa chọn
+        setCreateForm((p) => ({
+          ...p,
+          assigned_to: p.assigned_to || list[0]?.id || "",
+        }));
+      } catch (e) {
+        console.error(e);
+        alert("Không tải được danh sách admin");
+      }
+    })();
+  }, [createOpen]);
+  const submitCreate = async () => {
+    if (!me?.id) return alert("Chưa đăng nhập");
+    if (!me?.facility_id) return alert("Thiếu facility_id của user");
+    if (!createForm.title.trim()) return alert("Thiếu tiêu đề");
+    if (!createForm.description.trim()) return alert("Thiếu mô tả");
+    if (!createForm.assigned_to) return alert("Chưa chọn admin xử lý");
+
+    try {
+      setCreateLoading(true);
+
+      const fd = new FormData();
+      fd.append("title", createForm.title.trim());
+      fd.append("description", createForm.description.trim());
+      fd.append("proposed_fix", String(createForm.proposed_fix || "").trim());
+      fd.append("priority", createForm.priority);
+      fd.append("assigned_to", createForm.assigned_to);
+
+      fd.append("reporter_id", String(me.id));
+      fd.append("facility_id", String(me.facility_id));
+
+      previews.forEach((p) => fd.append("attachments", p.file));
+
+      const res = await fetch("/api/incidents", {
+        method: "POST",
+        body: fd,
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        console.error("create incident failed:", data);
+        alert(data?.error || "Gửi báo cáo thất bại");
+        return;
+      }
+
+      // ✅ đóng + reset + refresh list
+      setCreateOpen(false);
+      resetCreate();
+      await fetchIncidents(true);
+    } catch (e) {
+      console.error(e);
+      alert("Có lỗi khi gửi báo cáo");
+    } finally {
+      setCreateLoading(false);
+    }
+  };
+
   // ✅ giống admin: click lại card đang mở => đóng modal
   const selectIncident = (incidentId: string) => {
     if (!incidentId) return;
@@ -172,7 +322,7 @@ export default function ReportsPage() {
       }
 
       setComment("");
-      await fetchIncidents(true)
+      await fetchIncidents(true);
     } catch (e) {
       console.error(e);
       alert("Không gửi được bình luận");
@@ -181,56 +331,62 @@ export default function ReportsPage() {
     }
   };
 
-useEffect(() => {
-  const incidentId = selectedIncident?.id
-  if (!incidentId) return
+  useEffect(() => {
+    const incidentId = selectedIncident?.id;
+    if (!incidentId) return;
 
-  const channel = supabaseBrowser
-    .channel(`comments:${incidentId}`)
-    .on(
-      "postgres_changes",
-      {
-        event: "INSERT",
-        schema: "public",
-        table: "incident_comments",
-        filter: `incident_id=eq.${incidentId}`,
-      },
-      async (payload) => {
-        console.log("🔥 INSERT event received", payload)  // ✅ bắt bệnh
+    const channel = supabaseBrowser
+      .channel(`comments:${incidentId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "incident_comments",
+          filter: `incident_id=eq.${incidentId}`,
+        },
+        async (payload) => {
+          console.log("🔥 INSERT event received", payload); // ✅ bắt bệnh
 
-        const row = payload.new as any
+          const row = payload.new as any;
 
-        let author = null
-        try {
-          const { data } = await supabaseBrowser
-            .from("users")
-            .select("id,name,role")
-            .eq("id", row.author_id)
-            .maybeSingle()
-          author = data || null
-        } catch {}
+          let author = null;
+          try {
+            const { data } = await supabaseBrowser
+              .from("users")
+              .select("id,name,role")
+              .eq("id", row.author_id)
+              .maybeSingle();
+            author = data || null;
+          } catch {}
 
-        setSelectedIncident((prev) => {
-          if (!prev) return prev
-          if (String(prev.id) !== String(incidentId)) return prev // ✅ chống race
+          setSelectedIncident((prev) => {
+            if (!prev) return prev;
+            if (String(prev.id) !== String(incidentId)) return prev; // ✅ chống race
 
-          const prevComments = prev.comments || []
-          const exists = prevComments.some((c) => String(c.id) === String(row.id))
-          if (exists) return prev
+            const prevComments = prev.comments || [];
+            const exists = prevComments.some(
+              (c) => String(c.id) === String(row.id)
+            );
+            if (exists) return prev;
 
-          return { ...prev, comments: [...prevComments, { ...row, author }] }
-        })
-      }
-    )
-    .subscribe((status) => {
-      console.log("[realtime comments] status =", status, "incidentId =", incidentId)
-    })
+            return { ...prev, comments: [...prevComments, { ...row, author }] };
+          });
+        }
+      )
+      .subscribe((status) => {
+        console.log(
+          "[realtime comments] status =",
+          status,
+          "incidentId =",
+          incidentId
+        );
+      });
 
-  return () => {
-    supabaseBrowser.removeChannel(channel)
-  }
-}, [selectedIncident?.id])
-
+    return () => {
+      supabaseBrowser.removeChannel(channel);
+    };
+  }, [selectedIncident?.id]);
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -285,7 +441,7 @@ useEffect(() => {
   return (
     <ProtectedLayout requiredRole="reporter">
       <div className="p-4 md:p-8 bg-slate-50 min-h-screen">
-        <div className="max-w-6xl mx-auto">
+        <div className="mx-auto">
           {/* header */}
           <div className="mb-6 flex items-center justify-between gap-3">
             <div>
@@ -311,8 +467,9 @@ useEffect(() => {
               </Button>
 
               <Button
-                onClick={() => router.push("/reporter/reports/new")}
+                onClick={() => openCreate()}
                 className="bg-blue-600 hover:bg-blue-700"
+                disabled={loading || busy}
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Báo cáo mới
@@ -322,7 +479,7 @@ useEffect(() => {
 
           {/* LIST GRID */}
           {loading ? (
-            <div className="text-center py-10 text-slate-600">Đang tải...</div>
+            <LoadingSpinner size={32} />
           ) : incidents.length === 0 ? (
             <Card className="p-6 border-0">
               <p className="text-slate-600">
@@ -591,6 +748,209 @@ useEffect(() => {
               ) : null}
             </DialogContent>
           </Dialog>
+
+
+
+
+          <Dialog open={createOpen} onOpenChange={(v) => !createLoading && setCreateOpen(v)}>
+  <DialogContent className="max-w-3xl p-0 overflow-hidden">
+    <div className="flex flex-col max-h-[85vh]">
+      {/* Header */}
+      <div className="px-6 py-4 border-b bg-white">
+        <DialogHeader>
+          <DialogTitle className="flex items-start justify-between gap-3">
+            <div>
+              <div className="text-xl font-bold text-slate-900">Báo cáo sự cố mới</div>
+              <DialogDescription className="text-xs text-slate-500 mt-1">
+                Điền thông tin và gửi báo cáo ngay tại đây.
+              </DialogDescription>
+            </div>
+
+            <Button
+              variant="outline"
+              size="icon"
+              className="bg-transparent"
+              onClick={() => setCreateOpen(false)}
+              disabled={createLoading}
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          </DialogTitle>
+        </DialogHeader>
+      </div>
+
+      {/* Body */}
+      <div className="px-6 py-5 space-y-4 overflow-y-auto bg-slate-50">
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">Tiêu đề</label>
+          <input
+            className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg"
+            value={createForm.title}
+            onChange={(e) => setCreateForm((p) => ({ ...p, title: e.target.value }))}
+            disabled={createLoading}
+            placeholder="Mô tả ngắn gọn sự cố"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">Mô tả chi tiết</label>
+          <textarea
+            className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg"
+            rows={3}
+            value={createForm.description}
+            onChange={(e) => setCreateForm((p) => ({ ...p, description: e.target.value }))}
+            disabled={createLoading}
+            placeholder="Cung cấp thông tin chi tiết..."
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">Đề xuất khắc phục</label>
+          <textarea
+            className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg"
+            rows={2}
+            value={createForm.proposed_fix}
+            onChange={(e) => setCreateForm((p) => ({ ...p, proposed_fix: e.target.value }))}
+            disabled={createLoading}
+            placeholder="Hướng xử lý tạm thời / đề xuất..."
+          />
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Độ ưu tiên</label>
+            <select
+              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white"
+              value={createForm.priority}
+              onChange={(e) =>
+                setCreateForm((p) => ({ ...p, priority: e.target.value as any }))
+              }
+              disabled={createLoading}
+            >
+              <option value="low">Thấp</option>
+              <option value="medium">Trung bình</option>
+              <option value="high">Cao</option>
+              <option value="critical">Khẩn cấp</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Người xử lý (Admin)</label>
+            <select
+              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white"
+              value={createForm.assigned_to}
+              onChange={(e) => setCreateForm((p) => ({ ...p, assigned_to: e.target.value }))}
+              disabled={createLoading}
+              required
+            >
+              {admins.length === 0 ? (
+                <option value="">(Chưa có admin)</option>
+              ) : (
+                admins.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.name}
+                  </option>
+                ))
+              )}
+            </select>
+          </div>
+        </div>
+
+        {/* Attachments */}
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">Tệp đính kèm</label>
+
+          <label
+            className="block border-2 border-dashed border-slate-300 rounded-lg p-5 text-center cursor-pointer hover:border-blue-500 transition bg-white"
+            htmlFor="create_attachments"
+          >
+            <div className="text-sm text-slate-600">
+              Nhấn để chọn tệp (ảnh/video)
+            </div>
+            <div className="text-xs text-slate-500 mt-1">Có thể chọn nhiều tệp</div>
+          </label>
+
+          <input
+            id="create_attachments"
+            type="file"
+            multiple
+            accept="image/*,video/*"
+            className="hidden"
+            onChange={(e) => onPickFiles(e.target.files)}
+            disabled={createLoading}
+          />
+
+          {previews.length > 0 && (
+            <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {previews.map((p) => (
+                <div key={p.id} className="relative border rounded-md overflow-hidden bg-white">
+                  <button
+                    type="button"
+                    className="absolute top-2 right-2 z-10 bg-white/90 border rounded-full p-1"
+                    onClick={() => removePreview(p.id)}
+                    disabled={createLoading}
+                    title="Xóa"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+
+                  <button
+                    type="button"
+                    className="block w-full"
+                    onClick={() => window.open(p.url, "_blank")}
+                    title="Nhấn để xem"
+                  >
+                    {p.kind === "image" ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={p.url} alt={p.file.name} className="w-full h-24 object-cover" />
+                    ) : p.kind === "video" ? (
+                      <video src={p.url} className="w-full h-24 object-cover" />
+                    ) : (
+                      <div className="p-3 text-xs text-slate-700">{p.file.name}</div>
+                    )}
+                  </button>
+
+                  <div className="p-2 text-xs text-slate-600 truncate">{p.file.name}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="px-6 py-4 border-t bg-white flex justify-end gap-2">
+        <Button
+          variant="outline"
+          className="bg-transparent"
+          onClick={() => setCreateOpen(false)}
+          disabled={createLoading}
+        >
+          Hủy
+        </Button>
+
+        <Button
+          className="bg-blue-600 hover:bg-blue-700"
+          onClick={submitCreate}
+          disabled={createLoading}
+        >
+          {createLoading ? (
+            <span className="inline-flex items-center gap-2">
+              <LoadingSpinner size={16} />
+              Đang gửi...
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-2">
+              <Send className="w-4 h-4" />
+              Gửi báo cáo
+            </span>
+          )}
+        </Button>
+      </div>
+    </div>
+  </DialogContent>
+</Dialog>
+
         </div>
       </div>
     </ProtectedLayout>

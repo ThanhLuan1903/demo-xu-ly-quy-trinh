@@ -63,6 +63,7 @@ interface Incident {
   comments?: Comment[];
 }
 import { supabaseBrowser } from "@/lib/supabase-browser"
+import { LoadingSpinner } from "@/components/loading";
 
 export default function IncidentsPage() {
   const [incidents, setIncidents] = useState<Incident[]>([]);
@@ -341,7 +342,7 @@ export default function IncidentsPage() {
   return (
     <ProtectedLayout requiredRole="admin">
       <div className="p-4 md:p-8 bg-slate-50 min-h-screen">
-        <div className="max-w-6xl mx-auto">
+        <div className="mx-auto">
           {/* header */}
           <div className="mb-6 flex items-center justify-between gap-3">
             <div>
@@ -349,9 +350,7 @@ export default function IncidentsPage() {
                 Sự cố được giao cho tôi
               </h1>
               <p className="text-slate-600">
-                Chỉ hiển thị các báo cáo có{" "}
-                <span className="font-semibold">assigned_to</span> = admin đang
-                đăng nhập.
+                Chỉ hiển thị các báo cáo có mà bạn được giao để xử lý
               </p>
             </div>
 
@@ -372,7 +371,7 @@ export default function IncidentsPage() {
 
           {/* LIST GRID */}
           {loading ? (
-            <div className="text-center py-10 text-slate-600">Đang tải...</div>
+            <LoadingSpinner size={32} />
           ) : incidents.length === 0 ? (
             <Card className="p-6 border-0">
               <p className="text-slate-600">

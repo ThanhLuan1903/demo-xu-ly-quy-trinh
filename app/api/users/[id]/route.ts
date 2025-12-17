@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
+import { normalizeSearchText } from "../route";
 
 function err(message: string, status = 400) {
   return NextResponse.json({ error: message }, { status });
@@ -91,13 +92,32 @@ export async function PATCH(
     payload.is_active = !!body.is_active;
   }
 
+  // Nếu update name/email thì update luôn search_text
+if (payload.name !== undefined || payload.email !== undefined) {
+  // lấy giá trị cuối cùng (new nếu có, fallback current trong DB nếu không)
+  const { data: cur, error: curErr } = await supabaseAdmin
+    .from("users")
+    .select("name,email")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (curErr) return err("Failed to load user", 500);
+  if (!cur) return err("User not found", 404);
+
+  const finalName = String(payload.name ?? cur.name ?? "").trim();
+  const finalEmail = String(payload.email ?? cur.email ?? "").trim().toLowerCase();
+
+  payload.search_text = normalizeSearchText(finalName, finalEmail);
+}
+
+
   if (!Object.keys(payload).length) return err("Nothing to update", 400);
 
   const { data, error } = await supabaseAdmin
     .from("users")
     .update(payload)
     .eq("id", userId)
-    .select("id,name,email,role,facility_id,created_at,is_active")
+    .select("id,name,email,role,facility_id,created_at,is_active, search_text")
     .maybeSingle();
 
   if (error) {

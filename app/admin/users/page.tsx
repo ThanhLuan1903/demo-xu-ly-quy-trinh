@@ -23,6 +23,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import { LoadingSpinner } from "@/components/loading";
 
 type Role = "admin" | "reporter";
 
@@ -274,7 +275,7 @@ export default function UsersPage() {
   return (
     <ProtectedLayout requiredRole="admin">
       <div className="p-4 md:p-8 bg-slate-50 min-h-screen">
-        <div className="max-w-6xl mx-auto">
+        <div className="mx-auto">
           {/* Header */}
           <div className="flex items-start justify-between gap-3 mb-6 flex-wrap">
             <div>
@@ -312,7 +313,7 @@ export default function UsersPage() {
           <Card className="p-4 border-0 mb-4">
             <div className="flex flex-wrap gap-3 items-center">
               <div className="flex-1 min-w-64 relative">
-                <Search className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                 <Input
                   placeholder="Tìm theo tên/email..."
                   value={q}
@@ -328,7 +329,7 @@ export default function UsersPage() {
                   onValueChange={(v) => setRoleFilter(v as any)}
                   disabled={loading || busy}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="w-full">
                     <SelectValue placeholder="Vai trò" />
                   </SelectTrigger>
                   <SelectContent>
@@ -345,7 +346,7 @@ export default function UsersPage() {
                   onValueChange={(v) => setFacilityFilter(v)}
                   disabled={loading || busy}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="w-full">
                     <SelectValue placeholder="Cơ sở" />
                   </SelectTrigger>
                   <SelectContent>
@@ -364,7 +365,7 @@ export default function UsersPage() {
           {/* Table */}
           <Card className="p-6 border-0 overflow-x-auto">
             {loading ? (
-              <div className="text-center py-8 text-slate-600">Đang tải...</div>
+              <LoadingSpinner size={32} />
             ) : users.length === 0 ? (
               <div>Không có user</div>
             ) : (

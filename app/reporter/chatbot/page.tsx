@@ -28,47 +28,6 @@ export default function ChatbotPage() {
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
 
-  // Chỉ cần thay handleSendMessage thành thế này:
-  // const handleSendMessage = async () => {
-  //   if (!input.trim() || sending) return
-
-  //   const userMsg = { id: Date.now(), text: input, sender: "user" as const, timestamp: new Date() }
-  //   setMessages(prev => [...prev, userMsg])
-  //   setSending(true)
-  //   setInput("")
-
-  //   try {
-  //     const res = await fetch("/api/googleAI", {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({
-  //         message: input,
-  //         history: messages.slice(-10),
-  //       }),
-  //     })
-
-  //     const data = await res.json()
-
-  //     const aiMsg = {
-  //       id: Date.now() + 1,
-  //       text: data.reply,
-  //       sender: "ai" as const,
-  //       timestamp: new Date(),
-  //     }
-
-  //     setMessages(prev => [...prev, aiMsg])
-  //   } catch (error) {
-  //     setMessages(prev => [...prev, {
-  //       id: Date.now() + 1,
-  //       text: "Không kết nối được với AI. Thử lại nhé!",
-  //       sender: "ai",
-  //       timestamp: new Date(),
-  //     }])
-  //   } finally {
-  //     setSending(false)
-  //   }
-  // }
-
   const handleSendMessage = async () => {
     if (!input.trim() || sending) return;
 

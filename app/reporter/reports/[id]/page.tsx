@@ -12,6 +12,7 @@ import {
   Video,
   Send,
 } from "lucide-react";
+import { LoadingSpinner } from "@/components/loading";
 
 type Attachment = {
   id: string;
@@ -190,7 +191,7 @@ export default function ReportDetailPage() {
   if (loading)
     return (
       <ProtectedLayout requiredRole="reporter">
-        <div className="p-8 text-center">Đang tải...</div>
+        <LoadingSpinner size={32} />
       </ProtectedLayout>
     );
 
@@ -204,7 +205,7 @@ export default function ReportDetailPage() {
   return (
     <ProtectedLayout requiredRole="reporter">
       <div className="p-4 md:p-8 bg-slate-50 min-h-screen">
-        <div className="max-w-5xl mx-auto">
+        <div className="mx-auto">
           {/* Header */}
           <div className="mb-6 flex items-center gap-4">
             <Button onClick={() => router.back()} variant="outline" size="sm">

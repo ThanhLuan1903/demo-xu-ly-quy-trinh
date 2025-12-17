@@ -1,69 +1,138 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ProtectedLayout } from "@/components/protected-layout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, MessageSquare, FileText, Eye } from "lucide-react";
+import { Plus, MessageSquare, FileText, Eye, AlertCircle } from "lucide-react";
+import { LoadingSpinner } from "@/components/loading";
+
+type Role = "admin" | "reporter";
 
 interface Incident {
   id: string;
   title: string;
-  priority: string;
-  status: string;
+  priority: "low" | "medium" | "high" | "critical" | string;
+  status: "new" | "assigned" | "resolved" | "rejected" | string;
   created_at: string;
 }
-const getCurrentUser = () => {
+
+type CurrentUser = {
+  id: string;
+  role: Role;
+  facility_id: string | null;
+  name?: string;
+};
+
+const getCurrentUser = (): CurrentUser | null => {
   if (typeof window === "undefined") return null;
   try {
     const raw = localStorage.getItem("user");
     if (!raw) return null;
-    return JSON.parse(raw) as {
-      id: string;
-      role: "admin" | "reporter";
-      facility_id: string;
-      name?: string;
-    };
+    return JSON.parse(raw) as CurrentUser;
   } catch {
     return null;
   }
 };
 
+function statusLabel(s: string) {
+  switch (s) {
+    case "new":
+      return "Mới";
+    case "assigned":
+      return "Đã tiếp nhận";
+    case "resolved":
+      return "Đã xử lý";
+    case "rejected":
+      return "Từ chối";
+    default:
+      return s || "—";
+  }
+}
+
+function statusClass(s: string) {
+  switch (s) {
+    case "new":
+      return "bg-blue-100 text-blue-800";
+    case "assigned":
+      return "bg-purple-100 text-purple-800";
+    case "resolved":
+      return "bg-green-100 text-green-800";
+    case "rejected":
+      return "bg-red-100 text-red-800";
+    default:
+      return "bg-slate-100 text-slate-800";
+  }
+}
+
+function priorityClass(p: string) {
+  switch (p) {
+    case "critical":
+      return "bg-red-100 text-red-800";
+    case "high":
+      return "bg-orange-100 text-orange-800";
+    case "medium":
+      return "bg-yellow-100 text-yellow-800";
+    default:
+      return "bg-slate-100 text-slate-800";
+  }
+}
+
 export default function ReporterDashboard() {
   const router = useRouter();
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [loading, setLoading] = useState(true);
+  const [warn, setWarn] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchIncidents();
-  }, []);
-  const user = getCurrentUser();
-  if (!user?.facility_id) {
-    console.warn("Missing facility_id");
-    return;
-  }
-  const fetchIncidents = async () => {
+  const user = useMemo(() => getCurrentUser(), []);
+
+  const fetchIncidents = async (facilityId: string) => {
     try {
+      setWarn(null);
+      setLoading(true);
+
       const response = await fetch(
-        `/api/incidents?facility_id=${encodeURIComponent(user.facility_id)}`,
+        `/api/incidents?facility_id=${encodeURIComponent(facilityId)}`,
         { cache: "no-store" }
       );
-      const data = await response.json();
-      setIncidents(data);
+
+      const data = await response.json().catch(() => []);
+      if (!response.ok) {
+        console.error("fetch incidents failed:", data);
+        setWarn(data?.error || "Không tải được danh sách sự cố");
+        setIncidents([]);
+        return;
+      }
+
+      setIncidents(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Failed to fetch incidents:", error);
+      setWarn("Không tải được danh sách sự cố");
+      setIncidents([]);
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    if (!user?.facility_id) {
+      setWarn("Thiếu facility_id của user (localStorage). Hãy đăng nhập lại.");
+      setLoading(false);
+      return;
+    }
+    fetchIncidents(user.facility_id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.facility_id]);
+
+  const recent = (incidents ?? []).slice(0, 3);
+
   return (
     <ProtectedLayout requiredRole="reporter">
       <div className="p-4 md:p-8 bg-slate-50 min-h-screen">
-        <div className="max-w-6xl mx-auto">
+        <div className="mx-auto">
           {/* Header */}
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center justify-between mb-8 gap-3 flex-wrap">
             <div>
               <h1 className="text-3xl font-bold text-slate-900 mb-2">
                 Báo cáo sự cố
@@ -72,6 +141,7 @@ export default function ReporterDashboard() {
                 Quản lý và theo dõi các báo cáo sự cố của bạn
               </p>
             </div>
+
             <Button
               onClick={() => router.push("/reporter/reports/new")}
               className="bg-blue-600 hover:bg-blue-700 text-white"
@@ -101,7 +171,7 @@ export default function ReporterDashboard() {
             </Card>
 
             <Card
-              onClick={() => router.push("/reporter/processes")}
+              onClick={() => router.push("/reporter/procurement")}
               className="p-6 border-0 bg-gradient-to-br from-green-50 to-green-100 cursor-pointer hover:shadow-lg transition"
             >
               <div className="flex items-start justify-between">
@@ -110,7 +180,7 @@ export default function ReporterDashboard() {
                     Xem Quy trình
                   </p>
                   <p className="text-slate-700 text-sm">
-                    Tìm hiểu các quy trình mua sắm
+                    Tìm hiểu các quy trình
                   </p>
                 </div>
                 <Eye className="w-8 h-8 text-green-500" />
@@ -137,45 +207,78 @@ export default function ReporterDashboard() {
 
           {/* Recent Reports */}
           <div>
-            <h2 className="text-xl font-bold text-slate-900 mb-6">
-              Báo cáo gần đây của tôi
-            </h2>
-            {loading ? (
-              <div className="text-center py-8">Đang tải...</div>
+            <div className="flex items-center justify-between mb-4 gap-2 flex-wrap">
+              <h2 className="text-xl font-bold text-slate-900">
+                Báo cáo gần đây của tôi
+              </h2>
+
+              <Button
+                variant="outline"
+                className="bg-transparent"
+                onClick={() => router.push("/reporter/reports")}
+              >
+                Xem tất cả
+              </Button>
+            </div>
+
+            {warn ? (
+              <Card className="p-4 border-0 bg-red-50">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
+                  <div className="text-sm text-red-700">{warn}</div>
+                </div>
+              </Card>
+            ) : loading ? (
+              <div className="py-6">
+                <LoadingSpinner size={32} />
+              </div>
+            ) : recent.length === 0 ? (
+              <Card className="p-6 border-0">
+                <p className="text-slate-600">Bạn chưa có báo cáo nào.</p>
+              </Card>
             ) : (
               <div className="space-y-4">
-                {(incidents ?? []).slice(0, 3).map((report) => (
+                {recent.map((r) => (
                   <Card
-                    key={report.id}
-                    onClick={() =>
-                      router.push(`/reporter/reports/${report.id}`)
-                    }
+                    key={r.id}
+                    onClick={() => router.push(`/reporter/reports/${r.id}`)}
                     className="p-6 hover:shadow-md transition cursor-pointer border-0"
                   >
-                    <div className="flex items-start justify-between">
+                    <div className="flex items-start justify-between gap-3">
                       <div className="flex-1">
                         <h3 className="font-semibold text-slate-900 mb-2">
-                          {report.title}
+                          {r.title}
                         </h3>
-                        <p className="text-sm text-slate-600 mb-3">
-                          Ngày báo cáo:{" "}
-                          {new Date(report.created_at).toLocaleDateString(
-                            "vi-VN"
-                          )}
-                        </p>
-                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                          {report.status}
-                        </span>
+
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs font-medium ${statusClass(
+                              r.status
+                            )}`}
+                          >
+                            {statusLabel(r.status)}
+                          </span>
+
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs font-medium ${priorityClass(
+                              r.priority
+                            )}`}
+                          >
+                            {String(r.priority || "—")}
+                          </span>
+
+                          <span className="text-xs text-slate-500 ml-auto">
+                            {new Date(r.created_at).toLocaleDateString("vi-VN")}
+                          </span>
+                        </div>
                       </div>
-                      <Button variant="outline" size="sm">
+
+                      <Button variant="outline" size="sm" className="bg-transparent">
                         Xem chi tiết
                       </Button>
                     </div>
                   </Card>
                 ))}
-                {incidents.length === 0 && (
-                  <p className="text-slate-500">Bạn chưa có báo cáo nào</p>
-                )}
               </div>
             )}
           </div>

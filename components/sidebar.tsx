@@ -47,7 +47,7 @@ export function Sidebar({
         iconColor: "text-blue-600",
       },
       {
-        label: "Quy trình mua sắm",
+        label: "Quy trình",
         href: "/admin/procurement",
         icon: ShoppingCart,
         iconColor: "text-emerald-600",

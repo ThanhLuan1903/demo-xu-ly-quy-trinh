@@ -25,17 +25,6 @@ async function getProcurementData() {
 
   try {
     const [procRes, formRes] = await Promise.all([
-    //   fetch(
-    //     // `${
-    //     //   process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3001"
-    //     // }/api/procurement_processes`
-    //   ),
-    //   fetch(
-    //     // `${
-    //     //   process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3001"
-    //     // }/api/process-forms`
-    //   ),
-
     fetch("http://localhost:3001/procurement_processes"),
     fetch("http://localhost:3001/process_forms"),
     ]);

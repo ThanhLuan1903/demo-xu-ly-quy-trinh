@@ -127,7 +127,7 @@ export default function ProcessDetailPage() {
   }, [data]);
 
   return (
-    <ProtectedLayout requiredRole="admin">
+    <ProtectedLayout requiredRole="reporter">
       <div className="p-4 md:p-8 bg-slate-50 min-h-screen">
         <div className="mx-auto">
           <div className="flex items-center gap-3 mb-6">

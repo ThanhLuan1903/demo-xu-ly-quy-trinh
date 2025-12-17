@@ -42,7 +42,7 @@ export default function ProcurementPage() {
   const filtered = useMemo(() => processes, [processes])
 
   return (
-    <ProtectedLayout requiredRole="admin">
+    <ProtectedLayout requiredRole="reporter">
       <div className="p-4 md:p-8 bg-slate-50 min-h-screen">
         <div className="mx-auto">
           <div className="mb-8">
@@ -82,7 +82,7 @@ export default function ProcurementPage() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => router.push(`/admin/procurement/${p.id}`)}
+                        onClick={() => router.push(`/reporter/procurement/${p.id}`)}
                       >
                         <Eye className="w-4 h-4 mr-2" />
                         Xem chi tiết
