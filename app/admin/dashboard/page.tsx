@@ -184,11 +184,11 @@ const router = useRouter()
           {/* Header */}
           <div className="flex items-start justify-between gap-3 mb-6 flex-wrap">
             <div>
-              <h1 className="text-3xl font-bold text-slate-900 mb-2">
+              <h1 className="text-xl md:text-3xl font-bold text-slate-900 mb-2">
                 Tổng quan hệ thống
               </h1>
               <p className="text-slate-600">
-                Quản lý quy trình mua sắm và phản ánh sự cố
+                Quản lý quy trình và phản ánh sự cố
               </p>
             </div>
 
@@ -264,19 +264,19 @@ const router = useRouter()
                     </p>
                     <div className="space-y-2 text-sm">
                       <div className="flex items-center justify-between">
-                        <span className="text-slate-600">New</span>
+                        <span className="text-slate-600">Mới</span>
                         <span className="font-semibold">{counts.byStatus.new}</span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-slate-600">Assigned</span>
+                        <span className="text-slate-600">Đã được giao</span>
                         <span className="font-semibold">{counts.byStatus.assigned}</span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-slate-600">Resolved</span>
+                        <span className="text-slate-600">Đã giải quyết</span>
                         <span className="font-semibold">{counts.byStatus.resolved}</span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-slate-600">Rejected</span>
+                        <span className="text-slate-600">Đã từ chối</span>
                         <span className="font-semibold">{counts.byStatus.rejected}</span>
                       </div>
                     </div>
@@ -293,7 +293,7 @@ const router = useRouter()
                   <Button
                     variant="outline"
                     className="bg-transparent text-blue-600 hover:text-blue-700"
-                    // onClick={() => router.push("/admin/incidents")}
+                    onClick={() => router.push("/admin/incidents")}
                   >
                     Xem tất cả
                     <ArrowUpRight className="w-4 h-4 ml-2" />
@@ -370,7 +370,7 @@ const router = useRouter()
                 </div>
 
                 <div className="grid grid-cols-1 gap-3">
-                  <Button onClick={() => router.push("/admin/ai-assistant")} className="bg-blue-600 hover:bg-blue-700 justify-between">
+                  <Button onClick={() => router.push("/admin/chatbot")} className="bg-blue-600 hover:bg-blue-700 justify-between">
                     Hỏi nhanh quy trình
                     <ArrowUpRight className="w-4 h-4" />
                   </Button>

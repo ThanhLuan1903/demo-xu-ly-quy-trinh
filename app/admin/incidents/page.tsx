@@ -344,7 +344,7 @@ export default function IncidentsPage() {
       <div className="p-4 md:p-8 bg-slate-50 min-h-screen">
         <div className="mx-auto">
           {/* header */}
-          <div className="mb-6 flex items-center justify-between gap-3">
+          <div className="mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
             <div>
               <h1 className="text-3xl font-bold text-slate-900 mb-2">
                 Sự cố được giao cho tôi
@@ -510,7 +510,7 @@ export default function IncidentsPage() {
                     </div>
 
                     {/* status select */}
-                    <div className="w-[300px]">
+                    <div className="w-[200px]">
                       <label className="block text-sm font-medium text-slate-700 mb-1">
                         Trạng thái
                       </label>
@@ -524,7 +524,7 @@ export default function IncidentsPage() {
                         }
                         disabled={busy}
                       >
-                        <SelectTrigger>
+                        <SelectTrigger className="w-full">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>

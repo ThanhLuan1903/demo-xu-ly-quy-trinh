@@ -359,6 +359,8 @@ export default function UsersPage() {
                   </SelectContent>
                 </Select>
               </div>
+
+              
             </div>
           </Card>
 
@@ -470,7 +472,7 @@ export default function UsersPage() {
                 </DialogTitle>
                 <DialogDescription>
                   {mode === "create"
-                    ? "Tạo user mới (demo)."
+                    ? "Tạo user mới"
                     : "Cập nhật thông tin. Nếu không nhập mật khẩu thì giữ nguyên."}
                 </DialogDescription>
               </DialogHeader>
@@ -537,7 +539,8 @@ export default function UsersPage() {
                       }
                       disabled={busy}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="w-full">
+
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -561,7 +564,8 @@ export default function UsersPage() {
                       }
                       disabled={busy}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="w-full">
+
                         <SelectValue placeholder="Chọn cơ sở" />
                       </SelectTrigger>
                       <SelectContent>

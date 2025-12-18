@@ -105,7 +105,6 @@ export default function ChatbotPage() {
                   </div>
                 </div>
 
-                {/* optional: badge trạng thái */}
                 <div className="hidden md:flex items-center gap-2">
                   <span className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs text-slate-600">
                     <span className="h-2 w-2 rounded-full bg-emerald-500" />
@@ -117,7 +116,7 @@ export default function ChatbotPage() {
 
             {/* Chat Body */}
             <div className="bg-[radial-gradient(ellipse_at_top,rgba(59,130,246,0.08),transparent_50%),radial-gradient(ellipse_at_bottom,rgba(16,185,129,0.06),transparent_50%)]">
-              <div className="h-[calc(100vh-16rem)] md:h-[calc(100vh-18rem)] overflow-y-auto px-5 py-6">
+              <div className="h-[calc(100vh-16rem)] md:h-[calc(100vh-16rem)] overflow-y-auto px-5 py-6">
                 {/* Empty state */}
                 {messages.length === 0 && !sending && (
                   <div className="mx-auto max-w-xl text-center">
@@ -300,7 +299,6 @@ export default function ChatbotPage() {
                   </div>
 
                   <div className="mt-2 flex items-center justify-between text-xs text-slate-500">
-                    <span>Tip: nhập “/” để gợi ý câu hỏi nhanh</span>
                     <span>{input.trim().length}/2000</span>
                   </div>
                 </div>

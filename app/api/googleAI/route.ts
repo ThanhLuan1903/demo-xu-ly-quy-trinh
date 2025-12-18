@@ -1,6 +1,7 @@
 // app/api/googleAI/route.ts
 import { NextRequest, NextResponse } from "next/server"
 import { GoogleGenAI } from "@google/genai"
+import { PROCESS_CSVCKT_MIN, PROCESS_KKTS_MIN, PROCESS_MSHHDV_MIN, PROCESS_THTS_MIN, PROCESS_TLTS_MIN } from "@/constant/constant"
 
 export const runtime = "nodejs" // quan trọng khi deploy Vercel
 
@@ -9,46 +10,42 @@ type ClientMsg = {
   sender: "user" | "ai"
 }
 
+type GenAIRole = "user" | "model"
+
+function prettifyLinks(md: string) {
+  if (!md) return md;
+
+  // Case 1: "(Link:https://...)" hoặc "(Link: https://...)"
+  md = md.replace(
+    /\(Link:\s*(https?:\/\/[^\s)]+)\s*\)/gi,
+    (_m, url) => `([Tải biểu mẫu](${url}))`
+  );
+
+  // Case 2: "Link:https://..." (không có ngoặc)
+  md = md.replace(
+    /Link:\s*(https?:\/\/[^\s)]+)\s*/gi,
+    (_m, url) => `[Tải biểu mẫu](${url})`
+  );
+
+  // Case 3: "Biểu mẫu: Tên ( [Tải...] )" -> giữ, không đụng thêm
+  return md;
+}
+
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
 })
+const DOC_PACK = `
+${PROCESS_TLTS_MIN}
 
-// ====== 1) TÀI LIỆU NỘI BỘ (bạn có thể bổ sung thêm bước) ======
-const PROCESS_TLTS = `
-QUY TRÌNH: THANH LÝ TÀI SẢN (QT.0x/CĐĐN-TCHCQT)
+${PROCESS_KKTS_MIN}
 
-BƯỚC 1 — Đơn vị quản lý tài sản lập giấy đề nghị
-- Nội dung: Đơn vị quản lý/sử dụng xác định tài sản không còn nhu cầu hoặc tần suất sử dụng thấp/khai thác không hiệu quả; hoặc có nhu cầu nhưng chưa trang bị → chủ động đề xuất.
-- Chủ trì: Trưởng đơn vị có yêu cầu
-- Phối hợp: Phòng TCHC-QT
-- Kết quả: Giấy đề nghị
-- Thời hạn: (không nêu)
-- Biểu mẫu: M.01/QT.0x/CĐĐN-TCHCQT
+${PROCESS_THTS_MIN}
 
-BƯỚC 2 — Tổng hợp danh sách tài sản cần thanh lý
-- Nội dung: Trưởng phòng TCHC-QT kiểm tra, đối chiếu hồ sơ và xác định tài sản theo đề nghị; không đồng ý thì phản hồi; đồng ý thì tham mưu BGH phụ trách cơ sở phê duyệt.
-- Chủ trì: Trưởng phòng TCHC-QT
-- Phối hợp: Trưởng phòng Tài chính và các đơn vị liên quan
-- Kết quả: Giấy đề nghị (đã được xem xét)
-- Thời hạn: 3 ngày
-- Biểu mẫu: (không nêu)
+${PROCESS_CSVCKT_MIN}
 
-BƯỚC 3 — Kiểm tra, đánh giá hiện trạng
-- Nội dung: Kiểm tra xác nhận tình trạng; kiến nghị hướng xử lý đúng quy định tài chính.
-- Chủ trì: Trưởng phòng TC
-- Phối hợp: Trưởng phòng TCHC-QT
-- Kết quả: Biên bản hiện trạng
-- Thời hạn: 2 ngày
-- Biểu mẫu: M.02/QT.01/CĐĐN-TCHCQT
-
-BƯỚC 4 — Xét duyệt yêu cầu, danh mục đề xuất
-- Nội dung: Tổng hợp đề xuất; căn cứ biên bản kiểm kê/hiện trạng; lập danh mục tài sản cần thu hồi; lập kế hoạch thanh lý; tham mưu thành lập Hội đồng TLTS.
-- Chủ trì: Trưởng phòng TC / Trưởng phòng TCHC-QT (tùy nội dung)
-- Phối hợp: Đơn vị có tài sản cần thu hồi
-- Kết quả: Danh mục tài sản cần thu hồi; Kế hoạch thanh lý tài sản; Quyết định thành lập Hội đồng TLTS
-- Thời hạn: 2 ngày (theo từng nội dung)
-- Biểu mẫu: M.03/QT.0x/...; M.04/QT.0x/...; M.05/QT.0x/... (nếu áp dụng)
+${PROCESS_MSHHDV_MIN}
 `
+
 
 // ====== 2) System instruction (khóa nguồn + ép format) ======
 const SYSTEM_INSTRUCTION = `
@@ -61,7 +58,8 @@ YÊU CẦU ĐỊNH DẠNG:
 - Trả lời Markdown.
 - Không viết 1 đoạn dài.
 - Ưu tiên gạch đầu dòng.
-- Khi trả lời về 1 bước: luôn có các mục: Chủ trì / Phối hợp / Kết quả / Thời hạn / Biểu mẫu (nếu tài liệu có).
+- Khi trả lời về 1 bước: luôn có các mục: Nội dung công việc/ Chủ trì / Phối hợp / Kết quả / Thời hạn / Biểu mẫu (nếu tài liệu có).
+- Nếu có URL biểu mẫu: PHẢI viết theo Markdown link dạng: Biểu mẫu: [Tên biểu mẫu](URL)
 `
 
 function buildContents(message: string, history: ClientMsg[]) {
@@ -70,16 +68,20 @@ function buildContents(message: string, history: ClientMsg[]) {
     parts: [
       {
         text: `TÀI LIỆU NỘI BỘ (dùng làm nguồn duy nhất):
-${PROCESS_TLTS}
+${DOC_PACK}
 `,
       },
     ],
   }
 
-  const historyContents = (history || []).map((m) => ({
-    role: (m.sender === "user" ? "user" : "model") as const,
+ const historyContents = (history || []).map((m) => {
+  const role: GenAIRole = m.sender === "user" ? "user" : "model"
+
+  return {
+    role,
     parts: [{ text: m.text }],
-  }))
+  }
+})
 
   const latest = { role: "user" as const, parts: [{ text: message }] }
 
@@ -112,8 +114,11 @@ export async function POST(req: NextRequest) {
         maxOutputTokens: 1024,
       },
     })
+const raw = resp.text || "";
+const pretty = prettifyLinks(raw);
 
-    return NextResponse.json({ reply: resp.text || "" })
+return NextResponse.json({ reply: pretty });
+
   } catch (e) {
     console.error(e)
     return NextResponse.json({ error: "Google AI failed" }, { status: 500 })

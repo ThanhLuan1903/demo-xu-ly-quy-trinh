@@ -30,6 +30,7 @@ export function ProtectedLayout({
   const [loading, setLoading] = useState(true);
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isTabletDown, setIsTabletDown] = useState(false);
 
   useEffect(() => {
     // ✅ chỉ đọc localStorage
@@ -71,13 +72,33 @@ export function ProtectedLayout({
       setLoading(false);
     }
   }, [router, requiredRole, pathname]);
+  useEffect(() => {
+    // md trở xuống: <= 767px
+    const mq = window.matchMedia("(max-width: 767px)");
+
+    const apply = () => {
+      const small = mq.matches;
+      setIsTabletDown(small);
+      if (small) setSidebarCollapsed(true); // ép collapse
+    };
+
+    apply();
+
+    // Safari/old Chrome fallback
+    if (mq.addEventListener) mq.addEventListener("change", apply);
+    else mq.addListener(apply);
+
+    return () => {
+      if (mq.removeEventListener) mq.removeEventListener("change", apply);
+      else mq.removeListener(apply);
+    };
+  }, []);
 
   if (loading) {
     return <LoadingSpinner size={64} />;
   }
 
   if (!user) return null;
-
   const sidebarWidth = sidebarCollapsed ? 84 : 288;
 
   return (

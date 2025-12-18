@@ -264,7 +264,7 @@ export default function ReportDetailPage() {
               ) : null}
 
               {(incident.attachments || []).length > 0 && (
-                <div className="mt-6">
+                <div>
                   <div className="flex items-center justify-between mb-2">
                     <p className="text-sm font-semibold text-slate-900">
                       Tệp đính kèm
@@ -302,22 +302,12 @@ export default function ReportDetailPage() {
                   </div>
                 </div>
               )}
-              <div>
-                <p className="text-xs font-semibold text-slate-600 uppercase">
-                  Ngày báo cáo
-                </p>
-                <p className="text-sm text-slate-900">
-                  {new Date(incident.created_at).toLocaleString("vi-VN")}
-                </p>
-              </div>
 
-              <div>
-                <p className="text-xs font-semibold text-slate-600 uppercase">
-                  Cập nhật lần cuối
-                </p>
-                <p className="text-sm text-slate-900">
-                  {new Date(incident.updated_at).toLocaleString("vi-VN")}
-                </p>
+              <div className="text-xs text-slate-500">
+                Tạo: {new Date(incident.created_at).toLocaleString("vi-VN")}{" "}
+                <br />
+                Cập nhật lần cuối:{" "}
+                {new Date(incident.updated_at).toLocaleString("vi-VN")}
               </div>
             </Card>
 

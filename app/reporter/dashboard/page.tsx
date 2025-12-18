@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, MessageSquare, FileText, Eye, AlertCircle } from "lucide-react";
 import { LoadingSpinner } from "@/components/loading";
+import { getPriorityLabel, getStatusLabel } from "@/constant/constant";
 
 type Role = "admin" | "reporter";
 
@@ -35,21 +36,6 @@ const getCurrentUser = (): CurrentUser | null => {
     return null;
   }
 };
-
-function statusLabel(s: string) {
-  switch (s) {
-    case "new":
-      return "Mới";
-    case "assigned":
-      return "Đã tiếp nhận";
-    case "resolved":
-      return "Đã xử lý";
-    case "rejected":
-      return "Từ chối";
-    default:
-      return s || "—";
-  }
-}
 
 function statusClass(s: string) {
   switch (s) {
@@ -141,14 +127,6 @@ export default function ReporterDashboard() {
                 Quản lý và theo dõi các báo cáo sự cố của bạn
               </p>
             </div>
-
-            <Button
-              onClick={() => router.push("/reporter/reports/new")}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Báo cáo sự cố mới
-            </Button>
           </div>
 
           {/* Quick Actions */}
@@ -256,7 +234,7 @@ export default function ReporterDashboard() {
                               r.status
                             )}`}
                           >
-                            {statusLabel(r.status)}
+                            {getStatusLabel(r.status)}
                           </span>
 
                           <span
@@ -264,7 +242,7 @@ export default function ReporterDashboard() {
                               r.priority
                             )}`}
                           >
-                            {String(r.priority || "—")}
+                            {getPriorityLabel(r.priority || "—")}
                           </span>
 
                           <span className="text-xs text-slate-500 ml-auto">

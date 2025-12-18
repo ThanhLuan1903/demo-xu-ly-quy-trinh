@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { AlertCircle } from "lucide-react";
-
+import Image from "next/image";
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -55,24 +55,24 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 bg-blue-600 rounded-lg mb-4">
-            <svg
-              className="w-8 h-8 text-white"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z" />
-            </svg>
+          <div className="inline-flex items-center justify-center rounded-lg mb-4 bg-white">
+            <Image
+              src="/logo-dnc.png"
+              alt="DNC Logo"
+              width={140}
+              height={140}
+              className="object-contain"
+            />
           </div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">
-            AI Procurement
-          </h1>
-          <p className="text-slate-600">Management System</p>
+          <h1 className="text-3xl font-bold text-slate-900 mb-2">AI OFFICE</h1>
+          <p className="text-slate-600">
+            Hệ thống trợ lý ảo quản trị Tổ chức hành chính
+          </p>
         </div>
 
         <Card className="p-8 shadow-lg border-0">
           <h2 className="text-xl font-semibold text-slate-900 mb-6 text-center">
-            Sign In to Your Account
+            Đăng nhập tài khoản
           </h2>
 
           {error && (
@@ -88,7 +88,7 @@ export default function LoginPage() {
                 htmlFor="email"
                 className="block text-sm font-medium text-slate-700 mb-2"
               >
-                Email Address
+                Email
               </label>
               <Input
                 id="email"
@@ -106,7 +106,7 @@ export default function LoginPage() {
                 htmlFor="password"
                 className="block text-sm font-medium text-slate-700 mb-2"
               >
-                Password
+                Mật khẩu
               </label>
               <Input
                 id="password"
@@ -124,13 +124,13 @@ export default function LoginPage() {
               disabled={loading || !email || !password}
               className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition"
             >
-              {loading ? "Signing in..." : "Sign In"}
+              {loading ? "Đang đăng nhập ..." : "Đăng nhập"}
             </Button>
           </form>
 
           <div className="mt-8 pt-8 border-t border-slate-200">
-            <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide mb-4">
-              Demo Credentials
+            <p className="text-sm font-semibold text-slate-800 tracking-wide mb-4">
+              Tài khoản demo:
             </p>
             <div className="space-y-3 text-sm">
               <div>
@@ -152,10 +152,6 @@ export default function LoginPage() {
             </div>
           </div>
         </Card>
-
-        <p className="text-center text-slate-600 text-sm mt-6">
-          Protected application • Use demo credentials
-        </p>
       </div>
     </div>
   );

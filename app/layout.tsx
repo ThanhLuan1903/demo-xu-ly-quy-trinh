@@ -1,33 +1,34 @@
-import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
-import './globals.css'
+import type { Metadata } from "next";
+import "./globals.css";
+import { Be_Vietnam_Pro } from "next/font/google";
+const beVietnam = Be_Vietnam_Pro({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-sans",
+  display: "swap",
+});
 
-const _geist = Geist({ subsets: ["latin"] });
-const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'Chatbot thông minh',
+  title: "Chatbot thông minh",
   icons: {
     icon: [
       {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
+        url: "/icon-light-32x32.png",
+        media: "(prefers-color-scheme: light)",
       },
-
     ],
   },
-}
+};
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body>
-        {children}
-      </body>
+    <html lang="en" suppressHydrationWarning className={beVietnam.variable}>
+      <body suppressHydrationWarning>{children}</body>
     </html>
-  )
+  );
 }

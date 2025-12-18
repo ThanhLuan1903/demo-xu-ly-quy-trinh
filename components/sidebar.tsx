@@ -1,20 +1,20 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
   LayoutDashboard,
   Bot,
   ClipboardList,
   AlertTriangle,
   Users,
-  ShoppingCart,
   LogOut,
   PanelRightClose,
   PanelRightOpen,
+  ChartPie ,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
+import Image from "next/image";
 interface SidebarProps {
   role: "admin" | "reporter";
   userName?: string;
@@ -43,13 +43,13 @@ export function Sidebar({
       {
         label: "Tổng quan",
         href: "/admin/dashboard",
-        icon: LayoutDashboard,
+        icon: ChartPie,
         iconColor: "text-blue-600",
       },
       {
         label: "Quy trình",
         href: "/admin/procurement",
-        icon: ShoppingCart,
+        icon: ClipboardList,
         iconColor: "text-emerald-600",
       },
       {
@@ -66,7 +66,7 @@ export function Sidebar({
       },
       {
         label: "AI Trợ lý",
-        href: "/admin/ai-assistant",
+        href: "/admin/chatbot",
         icon: Bot,
         iconColor: "text-violet-600",
       },
@@ -79,7 +79,7 @@ export function Sidebar({
       {
         label: "Tổng quan",
         href: "/reporter/dashboard",
-        icon: LayoutDashboard,
+        icon: ChartPie,
         iconColor: "text-blue-600",
       },
       {
@@ -90,7 +90,7 @@ export function Sidebar({
       },
       {
         label: "Quy trình",
-        href: "/reporter/processes",
+        href: "/reporter/procurement",
         icon: ClipboardList,
         iconColor: "text-emerald-600",
       },
@@ -128,24 +128,42 @@ export function Sidebar({
       {/* dùng flex-col để đẩy user xuống đáy */}
       <div className="flex h-full flex-col">
         {/* Header / Brand + Toggle bên phải */}
-        <div className="flex items-center justify-between gap-3 px-4 py-4 border-b border-slate-200">
-          <div className="flex items-center gap-3 min-w-0">
-           
-            {!collapsed && (
+
+        <div
+          className={[
+            "px-4 py-6 border-b border-slate-200",
+            collapsed
+              ? "flex items-center justify-center"
+              : "flex items-center justify-between",
+          ].join(" ")}
+        >
+          {!collapsed && (
+            <div className="flex items-center min-w-0">
               <div className="min-w-0">
-                <h1 className="truncate text-sm font-semibold text-slate-900">
-                  AI Procurement
-                </h1>
-                <p className="truncate text-xs text-slate-500">
-                  Management System
-                </p>
+                <div className="flex items-center gap-2">
+                  <Image
+                    src="/logo-dnc.png"
+                    alt="DNC Logo"
+                    width={40}
+                    height={40}
+                    className="object-contain"
+                  />
+                  <div>
+                    <h1 className="truncate text-sm font-semibold text-slate-900">
+                      AI Office
+                    </h1>
+                    <p className="truncate text-xs text-slate-500">
+                      Trợ lý ảo quản trị hành chính
+                    </p>
+                  </div>
+                </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
           <button
             onClick={() => onCollapsedChange(!collapsed)}
-            className="rounded-xl p-2 hover:bg-slate-100 text-slate-700"
+            className="rounded-xl p-2 text-slate-700"
             aria-label="Toggle sidebar"
             title={collapsed ? "Mở rộng" : "Thu gọn"}
           >
@@ -194,11 +212,11 @@ export function Sidebar({
           <div className="rounded-2xl bg-slate-50 ring-1 ring-slate-200 p-4">
             {!collapsed ? (
               <>
-                <p className="text-xs text-slate-500">Logged in as</p>
+                <p className="text-xs text-slate-500">Tài khoản</p>
                 <p className="mt-1 text-sm font-semibold text-slate-900 truncate">
                   {userName}
                 </p>
-                <p className="mt-1 text-xs text-slate-500 capitalize">{role}</p>
+                <p className="text-xs text-slate-500 capitalize">{role}</p>
               </>
             ) : (
               <div className="flex items-center justify-center">

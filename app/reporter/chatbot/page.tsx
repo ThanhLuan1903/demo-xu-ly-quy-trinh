@@ -2,9 +2,7 @@
 
 import { useState } from "react";
 import { ProtectedLayout } from "@/components/protected-layout";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Send, MessageCircle } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -44,7 +42,6 @@ export default function ChatbotPage() {
     setInput("");
 
     try {
-      // lấy history trước khi có phản hồi AI (lọc 10 msg gần nhất)
       const history = messages.slice(-10).map((m) => ({
         text: m.text,
         sender: m.sender,
@@ -62,7 +59,7 @@ export default function ChatbotPage() {
       const data = await res.json();
       const aiMsg = {
         id: Date.now() + 1,
-        text: data.reply || "(Không có phản hồi)",
+        text: data.reply || "AI đang quá tải. Vui lòng chờ 1–2 phút rồi gửi lại câu hỏi.",
         sender: "ai" as const,
         timestamp: new Date(),
       };
@@ -90,7 +87,7 @@ export default function ChatbotPage() {
           <div className="overflow-hidden border-slate-200/70">
             {/* Header */}
             <div className="sticky top-0 z-10 border-b bg-white/80 backdrop-blur">
-              <div className="flex items-center justify-between px-5 py-4">
+              <div className="flex items-center justify-between px-5 py-4.5">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600/10 text-blue-700">
                     <MessageCircle className="h-5 w-5" />
@@ -105,7 +102,6 @@ export default function ChatbotPage() {
                   </div>
                 </div>
 
-                {/* optional: badge trạng thái */}
                 <div className="hidden md:flex items-center gap-2">
                   <span className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs text-slate-600">
                     <span className="h-2 w-2 rounded-full bg-emerald-500" />
@@ -117,7 +113,7 @@ export default function ChatbotPage() {
 
             {/* Chat Body */}
             <div className="bg-[radial-gradient(ellipse_at_top,rgba(59,130,246,0.08),transparent_50%),radial-gradient(ellipse_at_bottom,rgba(16,185,129,0.06),transparent_50%)]">
-              <div className="h-[calc(100vh-16rem)] md:h-[calc(100vh-18rem)] overflow-y-auto px-5 py-6">
+              <div className="h-[calc(100vh-16rem)] md:h-[calc(100vh-16rem)] overflow-y-auto px-5 py-6">
                 {/* Empty state */}
                 {messages.length === 0 && !sending && (
                   <div className="mx-auto max-w-xl text-center">
@@ -214,24 +210,6 @@ export default function ChatbotPage() {
                                   minute: "2-digit",
                                 })}
                               </span>
-
-                              {/* optional: hover actions */}
-                              <span className="opacity-0 transition group-hover:opacity-100">
-                                {/* ví dụ: copy */}
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    navigator.clipboard.writeText(m.text)
-                                  }
-                                  className={`rounded px-2 py-0.5 ${
-                                    isUser
-                                      ? "hover:bg-white/10"
-                                      : "hover:bg-slate-100"
-                                  }`}
-                                >
-                                  Copy
-                                </button>
-                              </span>
                             </div>
                           </div>
                         </div>
@@ -300,7 +278,7 @@ export default function ChatbotPage() {
                   </div>
 
                   <div className="mt-2 flex items-center justify-between text-xs text-slate-500">
-                    <span>Tip: nhập “/” để gợi ý câu hỏi nhanh</span>
+                    <span></span>
                     <span>{input.trim().length}/2000</span>
                   </div>
                 </div>
