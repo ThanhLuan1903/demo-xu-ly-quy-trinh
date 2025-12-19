@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useMemo, useState } from "react";
 import { ProtectedLayout } from "@/components/protected-layout";
 import { Card } from "@/components/ui/card";
@@ -17,12 +16,13 @@ import {
 import { getStatusLabel } from "@/constant/constant";
 import { LoadingSpinner } from "@/components/loading";
 import { useRouter } from "next/navigation"
+import { getPriorityColor, getStatusColor } from "@/app/types/process";
 
 interface Incident {
   id: string;
   title: string;
   priority: "low" | "medium" | "high" | "critical";
-  status: "new" | "assigned" | "resolved" | "rejected";
+  status: "open" | "assigned" | "resolved" | "rejected";
   created_at: string;
   facility_id: string;
 }
@@ -37,33 +37,6 @@ type ProcessLite = {
   steps_count?: number;
 };
 
-function getPriorityColor(priority: string) {
-  switch (priority) {
-    case "critical":
-      return "bg-red-100 text-red-800";
-    case "high":
-      return "bg-orange-100 text-orange-800";
-    case "medium":
-      return "bg-yellow-100 text-yellow-800";
-    default:
-      return "bg-blue-100 text-blue-800";
-  }
-}
-
-function getStatusColor(status: string) {
-  switch (status) {
-    case "new":
-      return "bg-blue-100 text-blue-800";
-    case "assigned":
-      return "bg-purple-100 text-purple-800";
-    case "resolved":
-      return "bg-green-100 text-green-800";
-    case "rejected":
-      return "bg-red-100 text-red-800";
-    default:
-      return "bg-slate-100 text-slate-800";
-  }
-}
 
 function SparkBars({ values }: { values: number[] }) {
   const max = Math.max(...values, 1);
@@ -125,7 +98,7 @@ const router = useRouter()
   const counts = useMemo(() => {
     const total = incidents.length;
     const byStatus = {
-      new: incidents.filter((i) => i.status === "new").length,
+      open: incidents.filter((i) => i.status === "open").length,
       assigned: incidents.filter((i) => i.status === "assigned").length,
       resolved: incidents.filter((i) => i.status === "resolved").length,
       rejected: incidents.filter((i) => i.status === "rejected").length,
@@ -136,15 +109,13 @@ const router = useRouter()
     return { total, byStatus, critical, high };
   }, [incidents]);
 
-  // fake trend demo (anh thay bằng API thống kê sau)
   const trend = useMemo(() => {
-    // lấy 14 phần tử giả lập từ incidents theo ngày (demo)
     const vals = Array.from({ length: 14 }, (_, idx) => {
-      const base = Math.max(0, counts.byStatus.new - 2);
+      const base = Math.max(0, counts.byStatus.open - 2);
       return Math.max(1, base + ((idx * 7) % 5));
     });
     return vals;
-  }, [counts.byStatus.new]);
+  }, [counts.byStatus.open]);
 
   const stats = [
     {
@@ -156,13 +127,13 @@ const router = useRouter()
     },
     {
       label: "Sự cố mới",
-      value: String(counts.byStatus.new),
+      value: String(counts.byStatus.open),
       hint: "Cần xử lý",
       icon: <AlertCircle className="w-5 h-5 text-orange-600" />,
       bg: "bg-orange-50",
     },
     {
-      label: "Đã xử lý",
+      label: "Đã giải quyết",
       value: String(counts.byStatus.resolved),
       hint: "Resolved",
       icon: <CheckCircle2 className="w-5 h-5 text-green-600" />,
@@ -265,7 +236,7 @@ const router = useRouter()
                     <div className="space-y-2 text-sm">
                       <div className="flex items-center justify-between">
                         <span className="text-slate-600">Mới</span>
-                        <span className="font-semibold">{counts.byStatus.new}</span>
+                        <span className="font-semibold">{counts.byStatus.open}</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-slate-600">Đã được giao</span>

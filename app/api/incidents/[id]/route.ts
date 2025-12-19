@@ -74,3 +74,47 @@ export async function PUT(
     );
   }
 }
+
+
+
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params
+
+    if (!id) {
+      return NextResponse.json({ error: "Missing incident id" }, { status: 400 })
+    }
+
+    const body = await req.json().catch(() => ({} as any))
+    const status = String(body.status ?? "").trim()
+
+    if (!status) {
+      return NextResponse.json({ error: "Missing status" }, { status: 400 })
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from("incidents")
+      .update({ status })
+      .eq("id", id)
+      .select("*")
+      .maybeSingle()
+
+    if (error) {
+      console.error("Supabase error:", error)
+      return NextResponse.json({ error: "Failed to update incident" }, { status: 500 })
+    }
+
+    if (!data) {
+      return NextResponse.json({ error: "Incident not found" }, { status: 404 })
+    }
+
+    return NextResponse.json(data, { status: 200 })
+  } catch (e) {
+    console.error("PATCH /api/incidents/[id] error:", e)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+  }
+}
+

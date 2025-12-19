@@ -72,14 +72,29 @@ export default function ReporterDashboard() {
   const [warn, setWarn] = useState<string | null>(null);
 
   const user = useMemo(() => getCurrentUser(), []);
-
-  const fetchIncidents = async (facilityId: string) => {
+  const me = useMemo(() => {
+    const raw =
+      typeof window !== "undefined" ? localStorage.getItem("user") : null;
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw) as {
+        id: string;
+        role: string;
+        facility_id: string;
+        name: string;
+      };
+    } catch {
+      return null;
+    }
+  }, []);
+  const fetchIncidents = async () => {
+    if (!me?.id) return;
     try {
       setWarn(null);
       setLoading(true);
 
       const response = await fetch(
-        `/api/incidents?facility_id=${encodeURIComponent(facilityId)}`,
+        `/api/incidents?viewer_id=${me.id}&role=reporter`,
         { cache: "no-store" }
       );
 
@@ -107,8 +122,7 @@ export default function ReporterDashboard() {
       setLoading(false);
       return;
     }
-    fetchIncidents(user.facility_id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    fetchIncidents();
   }, [user?.facility_id]);
 
   const recent = (incidents ?? []).slice(0, 3);
@@ -251,7 +265,11 @@ export default function ReporterDashboard() {
                         </div>
                       </div>
 
-                      <Button variant="outline" size="sm" className="bg-transparent">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="bg-transparent"
+                      >
                         Xem chi tiết
                       </Button>
                     </div>

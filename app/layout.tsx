@@ -10,12 +10,11 @@ const beVietnam = Be_Vietnam_Pro({
 
 
 export const metadata: Metadata = {
-  title: "Chatbot thông minh",
+  title: "AI Office",
   icons: {
     icon: [
       {
-        url: "/icon-light-32x32.png",
-        media: "(prefers-color-scheme: light)",
+        url: "/logo-dnc.png",
       },
     ],
   },

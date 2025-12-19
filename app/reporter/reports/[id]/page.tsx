@@ -13,6 +13,8 @@ import {
   Send,
 } from "lucide-react";
 import { LoadingSpinner } from "@/components/loading";
+import { getPriorityColor, getStatusColor } from "@/app/types/process";
+import { getPriorityLabel, getStatusLabel } from "@/constant/constant";
 
 type Attachment = {
   id: string;
@@ -138,34 +140,6 @@ export default function ReportDetailPage() {
     }
   };
 
-  const getPriorityPill = (priority: string) => {
-    switch (priority) {
-      case "critical":
-        return "bg-red-100 text-red-800";
-      case "high":
-        return "bg-orange-100 text-orange-800";
-      case "medium":
-        return "bg-yellow-100 text-yellow-800";
-      default:
-        return "bg-blue-100 text-blue-800";
-    }
-  };
-
-  const getStatusPill = (status: string) => {
-    switch (status) {
-      case "new":
-        return "bg-blue-100 text-blue-800";
-      case "assigned":
-        return "bg-purple-100 text-purple-800";
-      case "resolved":
-        return "bg-green-100 text-green-800";
-      case "rejected":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-slate-100 text-slate-800";
-    }
-  };
-
   const summarizeAttachments = (atts?: Attachment[]) => {
     const a = atts || [];
     const img = a.filter((x) => x.type === "image").length;
@@ -225,18 +199,18 @@ export default function ReportDetailPage() {
             </div>
             <div className="flex gap-2">
               <span
-                className={`px-3 py-1 rounded-full text-xs font-semibold ${getPriorityPill(
+                className={`px-3 py-1 rounded-full text-xs font-semibold ${getPriorityColor(
                   incident.priority
                 )}`}
               >
-                {incident.priority}
+                {getPriorityLabel(incident.priority)}
               </span>
               <span
-                className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusPill(
+                className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(
                   incident.status
                 )}`}
               >
-                {incident.status}
+                {getStatusLabel(incident.status)}
               </span>
             </div>
           </div>
@@ -309,10 +283,10 @@ export default function ReportDetailPage() {
                 Cập nhật lần cuối:{" "}
                 {new Date(incident.updated_at).toLocaleString("vi-VN")}
               </div>
-            </Card>
+              {/* </Card> */}
 
-            {/* Comments */}
-            <Card className="p-6 md:p-8 border-0 shadow-lg">
+              {/* Comments */}
+              {/* <Card className="p-6 md:p-8 border-0 shadow-lg"> */}
               <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
                 <MessageSquare className="w-4 h-4" />
                 Trao đổi với người tiếp nhận

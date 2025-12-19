@@ -1,5 +1,3 @@
-// src/types/process.ts
-
 export type ActorType = "performer" | "coordinator"
 
 export type ProcessRow = {
@@ -63,3 +61,32 @@ export type ProcessDetail = ProcessRow & {
     }
   >
 }
+
+
+ export const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case "critical":
+        return "bg-red-100 text-red-800";
+      case "high":
+        return "bg-orange-100 text-orange-800";
+      case "medium":
+        return "bg-yellow-100 text-yellow-800";
+      default:
+        return "bg-blue-100 text-blue-800";
+    }
+  };
+
+ export const getStatusColor = (status: string) => {
+    switch (status) {
+      case "new":
+        return "bg-blue-100 text-blue-800";
+      case "assigned":
+        return "bg-purple-100 text-purple-800";
+      case "resolved":
+        return "bg-green-100 text-green-800";
+      case "rejected":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-slate-100 text-slate-800";
+    }
+  };

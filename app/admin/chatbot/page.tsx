@@ -2,13 +2,11 @@
 
 import { useState } from "react";
 import { ProtectedLayout } from "@/components/protected-layout";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Send, MessageCircle } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-
+import Image from "next/image";
 interface Message {
   id: number;
   text: string;
@@ -164,8 +162,15 @@ export default function ChatbotPage() {
                       >
                         {/* Avatar left for AI */}
                         {!isUser && (
-                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm">
-                            <span className="text-xs font-semibold">AI</span>
+                          <div className="flex shrink-0 items-center justify-center">
+                            <Image
+                              src="/ai-icon.png"
+                              alt="AI Assistant"
+                              width={54}
+                              height={24}
+                              className="object-contain"
+                              priority
+                            />
                           </div>
                         )}
 
@@ -177,7 +182,7 @@ export default function ChatbotPage() {
                           <div
                             className={`relative rounded-2xl px-4 py-3 shadow-sm ring-1 ${
                               isUser
-                                ? "bg-blue-600 text-white ring-blue-600/20"
+                                ? "bg-blue-500 text-white ring-blue-600/20"
                                 : "bg-white text-slate-900 ring-slate-200"
                             }`}
                           >
@@ -185,8 +190,8 @@ export default function ChatbotPage() {
                             <span
                               className={`absolute bottom-2 h-3 w-3 rotate-45 ${
                                 isUser
-                                  ? "-right-1 bg-blue-600"
-                                  : "-left-1 bg-white ring-1 ring-slate-200"
+                                  ? "-right-1.5 bg-blue-500"
+                                  : "-left-1.5 bg-white ring-1 ring-slate-200"
                               }`}
                             />
 
@@ -212,24 +217,6 @@ export default function ChatbotPage() {
                                   hour: "2-digit",
                                   minute: "2-digit",
                                 })}
-                              </span>
-
-                              {/* optional: hover actions */}
-                              <span className="opacity-0 transition group-hover:opacity-100">
-                                {/* ví dụ: copy */}
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    navigator.clipboard.writeText(m.text)
-                                  }
-                                  className={`rounded px-2 py-0.5 ${
-                                    isUser
-                                      ? "hover:bg-white/10"
-                                      : "hover:bg-slate-100"
-                                  }`}
-                                >
-                                  Copy
-                                </button>
                               </span>
                             </div>
                           </div>

@@ -64,6 +64,7 @@ interface Incident {
 }
 import { supabaseBrowser } from "@/lib/supabase-browser"
 import { LoadingSpinner } from "@/components/loading";
+import { getPriorityColor, getStatusColor } from "@/app/types/process";
 
 export default function IncidentsPage() {
   const [incidents, setIncidents] = useState<Incident[]>([]);
@@ -270,35 +271,6 @@ export default function IncidentsPage() {
 }, [selectedIncident?.id])
 
 
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "critical":
-        return "bg-red-100 text-red-800";
-      case "high":
-        return "bg-orange-100 text-orange-800";
-      case "medium":
-        return "bg-yellow-100 text-yellow-800";
-      default:
-        return "bg-blue-100 text-blue-800";
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "new":
-        return "bg-blue-100 text-blue-800";
-      case "assigned":
-        return "bg-purple-100 text-purple-800";
-      case "resolved":
-        return "bg-green-100 text-green-800";
-      case "rejected":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-slate-100 text-slate-800";
-    }
-  };
-
   const summarizeAttachments = (atts?: Attachment[]) => {
     const a = atts || [];
     const img = a.filter((x) => x.type === "image").length;
@@ -405,7 +377,6 @@ export default function IncidentsPage() {
 
                     <div className="mt-3 flex items-center justify-between gap-3 flex-wrap">
                       <div className="flex gap-2 items-center flex-wrap">
-                        {/* <Badge className={getStatusColor(incident.status)}>{incident.status}</Badge> */}
                         <Badge className={getStatusColor(incident.status)}>
                           {getStatusLabel(incident.status)}
                         </Badge>

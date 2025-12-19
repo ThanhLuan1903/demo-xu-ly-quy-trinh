@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Send, MessageCircle } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import Image from "next/image";
 
 interface Message {
   id: number;
@@ -161,9 +162,16 @@ export default function ChatbotPage() {
                       >
                         {/* Avatar left for AI */}
                         {!isUser && (
-                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm">
-                            <span className="text-xs font-semibold">AI</span>
-                          </div>
+                          <div className="flex shrink-0 items-center justify-center">
+                              <Image
+                                src="/ai-icon.png"
+                                alt="AI Assistant"
+                                width={54}
+                                height={24}
+                                className="object-contain"
+                                priority
+                              />
+                            </div>
                         )}
 
                         <div
@@ -182,8 +190,8 @@ export default function ChatbotPage() {
                             <span
                               className={`absolute bottom-2 h-3 w-3 rotate-45 ${
                                 isUser
-                                  ? "-right-1 bg-blue-600"
-                                  : "-left-1 bg-white ring-1 ring-slate-200"
+                                  ? "-right-1.5 bg-blue-600"
+                                  : "-left-1.5 bg-white ring-1 ring-slate-200"
                               }`}
                             />
 
